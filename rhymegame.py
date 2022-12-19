@@ -22,7 +22,7 @@ SCORES = {
     "rhy" : 50,
     "nry" : 25,
     "hom" : 15,
-    "cns" : 15,
+    "cns" : 10,
 }
 
 CODE_TO_NAME_MAPPING = {
