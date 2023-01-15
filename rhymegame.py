@@ -1,9 +1,21 @@
+TOKEN= 'MTA1NDc3NDE5NzkyODMzNzQzOQ.G3WugQ.r_Ph0t5SJJG7TC2Ek9ga2bQDB2X5nBBhLU9RZo'
+
 # %%
 import requests
 import random
 from typing import List, Dict
 rhyme_endpoint = "https://api.datamuse.com/words"
 file_name = "3000_words_no_spaces.txt"
+
+#discord py imports
+import discord
+import requests
+intents = discord.Intents.all()
+client = discord.Client(command_prefix='!', intents=intents)
+
+import tracemalloc
+
+tracemalloc.start()
 
 with open(file_name, "r") as f:
     english_lower_list = []
@@ -62,7 +74,7 @@ def create_rhyme_results_list_of_dict(chosen_words : List[str]) -> List[Dict[str
         list_of_output_dicts.append(output_dict)
     return list_of_output_dicts
 
-def full_game_iteration(NUMBER_OF_WORDS):
+def full_game_iteration(NUMBER_OF_WORDS, message):
     total_score = 0
     
     # finds n random words from a list
@@ -71,8 +83,13 @@ def full_game_iteration(NUMBER_OF_WORDS):
     for level,chosen_word in enumerate(chosen_words):
         # asks user to input a word that rhymes
         displayword = chosen_word.replace("_"," ")
-        guess = input(f"Find a rhyme for \"{displayword}\": ")
-
+        message.channel.send(f"Find a rhyme for \"{displayword}\": ")
+        guess=38147913
+        @client.event
+        async def on_message(message):
+    # Get the previous message from the channel
+            async for previous_message in message.channel.history(limit=1):
+                guess= previous_message.content
 
         # find the words that rhy nry hom cns
         # look for the user input inside of these and determine score
@@ -85,21 +102,27 @@ def full_game_iteration(NUMBER_OF_WORDS):
             #update total score
             total_score += score_for_level * res[first_matched_type[0]]['numSyllables']
 
-            print(f"""\
+            message.channel.send(f"""\
             Your guess: {guess}
             Type: {CODE_TO_NAME_MAPPING[first_matched_type[0]]}
             Score: {score_for_level} * {res[first_matched_type[0]]['numSyllables']} Syllable
             Total Score: {total_score}""")
         else:
-            print(f"""\
+            message.channel.send(f"""\
             Your guess: {guess}
             Type: NO MATCH
             Score: 0
             Total Score: {total_score}""")
 
-if __name__ == "__main__":
-    N = 3
-    print(f"Setting up game for {N} words")
-    full_game_iteration(N)
+
+@client.event
+async def on_message(message):
+    if message.content.startswith("!start"):
+        N = 3
+        message.channel.send(f"Setting up game for {N} words")
+        full_game_iteration(N, message)
+
+client.run(TOKEN)
+    
 
 # %%
