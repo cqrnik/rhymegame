@@ -140,6 +140,7 @@ async def on_message(message):
     # start command
     if message.content.startswith("!start"):
             await message.channel.send(f"Enter game length")
+            
             N = None
             while N is None:  
                 async for prev in message.channel.history(limit=1):
