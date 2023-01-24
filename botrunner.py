@@ -1,4 +1,3 @@
-TOKEN= 'MTA1NDc3NDE5NzkyODMzNzQzOQ.G3WugQ.r_Ph0t5SJJG7TC2Ek9ga2bQDB2X5nBBhLU9RZo'
 
 import discord
 import requests
@@ -12,6 +11,10 @@ client = discord.Client(command_prefix='!', intents=intents)
 
 import tracemalloc
 tracemalloc.start()
+
+from collections import namedtuple
+
+
  
 with open(file_name, "r") as f:
     english_lower_list = []
@@ -67,11 +70,14 @@ def check_matches(user_guess : str, list_of_results_of_different_codes: Dict[str
             matches[code] = {}
     return matches
 
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
 @client.event
+
+
 async def on_message(message):
     
     # TODO: Optimization- on the game setup we pick the words
@@ -79,6 +85,11 @@ async def on_message(message):
     
     #return content of previous message
         
+    async def exitGame():
+        await message.channel.send(f"Exiting game...") 
+        players=[]
+        return
+
 
     # game iteration
     async def full_game_iteration(NUMBER_OF_WORDS):
@@ -88,7 +99,7 @@ async def on_message(message):
         chosen_words = random.sample(english_lower_list,NUMBER_OF_WORDS)
         list_of_output_dicts = create_rhyme_results_list_of_dict(chosen_words)
         for level,chosen_word in enumerate(chosen_words):
-            guess=None #random value that won't rhyme with anything
+            guess=None 
             # asks user to input a word that rhymes
             displayword = chosen_word.replace("_"," ")
             await message.channel.send(f"Find a rhyme for \"{displayword}\": ")
@@ -139,16 +150,57 @@ async def on_message(message):
 
     # start command
     if message.content.startswith("!start"):
+
+            #create list of tuples for players in the game
+            players= []
+            gameRunning=True
+
+            players.append({
+                'user':message.author,
+                'score':0
+            })
+            await message.channel.send(f"""\
+                Rhyme Game
+                !join to join the game
+                !continue to finalize players
+                !cancel to exit
+            """)
+            check=False
+            while check==False:
+                async for prev in message.channel.history(limit=1):
+                    if (prev.content == "!join"):
+                        if [d['user'] for d in players]==message.author: #check duplicate
+                            await message.channel.send(f"Player has already joined")
+                            return
+                        else: 
+                            players.append({    #add player
+                            'user':message.author,
+                            'score':0
+                        })
+                    if (prev.content == "!continue"): #exit player add
+                        check=True
+
+                    if (prev.content == "!cancel"): #exit player add
+                        exitGame()
+                        exit
+            print (players)         
+
             await message.channel.send(f"Enter game length")
-            
-            N = None
+            #await client.add_reaction(message, ":white_check_mark:")
+            N=None
             while N is None:  
                 async for prev in message.channel.history(limit=1):
                     if (prev.author == message.author and int(prev.content)<=50):
                         N=int(prev.content)
-            
-            await message.channel.send(f"Setting up game for {N} words...")
-            await full_game_iteration(N)
+                    
+            if N==0:
+                        exitGame()
+                        exit
+            else:
+                
+                await message.channel.send(f"Setting up game for {N} words...")
+                await full_game_iteration(N)
+                players=[]
             
     
 
