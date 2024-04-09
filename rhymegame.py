@@ -1,4 +1,4 @@
-TOKEN= 'MTA1NDc3NDE5NzkyODMzNzQzOQ.G3WugQ.r_Ph0t5SJJG7TC2Ek9ga2bQDB2X5nBBhLU9RZo'
+TOKEN= ''
 
 # %%
 import requests
